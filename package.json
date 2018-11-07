@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/YSOUZAS/nodejs-the-complete-guide#readme",
   "devDependencies": {
+    "eslint": "^5.8.0",
     "nodemon": "^1.18.6"
   },
   "dependencies": {
