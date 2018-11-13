@@ -53,8 +53,8 @@ app.use('/auth', authRoutes);
 app.use((error, req, res) => {
   console.log(error);
   const status = error.statusCode || 500;
-  const { message } = error;
-  res.status(status).json({ message });
+  const { message, data } = error;
+  res.status(status).json({ message, data });
 });
 
 mongoose
@@ -65,4 +65,4 @@ mongoose
   .then(() => {
     app.listen(8080);
   })
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
