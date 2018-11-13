@@ -1,5 +1,6 @@
 const express = require('express');
-const { body } = require('express-validator/check');
+const { body, param } = require('express-validator/check');
+
 const feedController = require('../controllers/feed');
 
 const router = express.Router();
@@ -13,12 +14,12 @@ router.post(
   [
     body('title')
       .trim()
-      .isLength({ min: 3 }),
+      .isLength({ min: 5 }),
     body('content')
       .trim()
-      .isLength({ min: 3 })
+      .isLength({ min: 5 }),
   ],
-  feedController.createPost
+  feedController.createPost,
 );
 
 router.get('/post/:postId', feedController.getPost);
@@ -28,12 +29,22 @@ router.put(
   [
     body('title')
       .trim()
-      .isLength({ min: 3 }),
+      .isLength({ min: 5 }),
     body('content')
       .trim()
-      .isLength({ min: 3 })
+      .isLength({ min: 5 }),
   ],
-  feedController.updatePost
+  feedController.updatePost,
+);
+
+router.delete(
+  '/post/:postId',
+  [
+    param('postId')
+      .trim()
+      .isLength({ min: 5 }),
+  ],
+  feedController.deletePost,
 );
 
 module.exports = router;

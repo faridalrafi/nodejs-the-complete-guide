@@ -1,3 +1,6 @@
 {
-    "extends": "airbnb-base"
+  "rules": {
+    "operator-linebreak": [2, "after", { "overrides": { "?": "after" } }]
+  },
+  "extends": "airbnb-base"
 }
