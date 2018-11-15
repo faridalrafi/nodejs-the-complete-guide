@@ -167,6 +167,7 @@ exports.deletePost = (req, res, next) => {
     .catch((err) => {
       const errorToSend = err;
       if (!errorToSend.statusCode) errorToSend.statusCode = 500;
+      errorToSend.message = err.message;
       next(errorToSend);
     });
 };

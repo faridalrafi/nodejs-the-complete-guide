@@ -6,23 +6,23 @@ const userSchema = new Schema(
   {
     email: {
       type: String,
-      required: true
+      required: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     status: {
       type: String,
-      required: true
+      default: 'new',
     },
-    posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }]
+    posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('User', userSchema);

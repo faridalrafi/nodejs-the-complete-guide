@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 
 const config = require('./config/cors');
+const errorHandler = require('./config/error');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -44,12 +45,7 @@ app.use(config.cors);
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
 
-app.use((error, req, res) => {
-  console.log(error);
-  const status = error.statusCode || 500;
-  const { message, data } = error;
-  res.status(status).json({ message, data });
-});
+app.use(errorHandler.error);
 
 mongoose
   .connect(
