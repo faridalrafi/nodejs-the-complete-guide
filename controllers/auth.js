@@ -13,7 +13,6 @@ exports.signup = (req, res, next) => {
     throw error;
   }
   const { email, name, password } = req.body;
-
   bcrypt
     .hash(password, 12)
     .then((hashedPw) => {
@@ -37,6 +36,7 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
   const { email, password } = req.body;
+
   let loadedUser;
   User.findOne({ email })
     .then((user) => {
