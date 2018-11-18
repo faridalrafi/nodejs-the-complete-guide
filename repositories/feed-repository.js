@@ -3,9 +3,8 @@ const Post = require('../models/post');
 module.exports = {
   postsCount: () => Post.find().countDocuments(),
 
-  find: (perPage, currentPage) =>
-    Post.find()
-      .populate('creator')
+  find: (perPage, currentPage) => Post.find()
+      .populate('creator', ['_id', 'name'])
       .sort({ createdAt: -1 })
       .skip((currentPage - 1) * perPage)
       .limit(perPage),
@@ -20,5 +19,5 @@ module.exports = {
     return post.save();
   },
 
-  findById: (id) => Post.findById(id),
+  findById: id => Post.findById(id),
 };
