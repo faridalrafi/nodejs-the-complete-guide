@@ -3,6 +3,7 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 
 const feedRepository = require('../repositories/feed-repository');
+const socket = require('../config/socket');
 
 const clearImage = (filePath) => {
   const filePathToDelete = path.join(__dirname, '..', filePath);
@@ -59,6 +60,11 @@ exports.createPost = async (req, res, next) => {
     creator.posts.push(post);
     const result = await creator.save();
 
+    const io = socket.getIO();
+    io.emit('post', {
+      action: 'create',
+      post: { ...post._doc, creator: { _id: req.userId, name: user.name } },
+    });
     res.status(201).json({
       message: 'Post created successfully!',
       post,
@@ -117,7 +123,7 @@ exports.updatePost = async (req, res, next) => {
       throw error;
     }
 
-    if (post.creator.toString() !== req.userId) {
+    if (post.creator._id.toString() !== req.userId) {
       const error = new Error('Not authorized!');
       error.statusCode = 403;
       throw error;
@@ -130,7 +136,12 @@ exports.updatePost = async (req, res, next) => {
     post.title = title;
     post.imageUrl = imageUrl;
     post.content = content;
+
     const result = await post.save();
+
+    const io = socket.getIO();
+    io.getIO().emit('posts', { action: 'update', post: result });
+
     res.status(200).json({ message: 'Post updated!', post: result });
   } catch (err) {
     if (!err.statusCode) {
@@ -151,7 +162,7 @@ exports.deletePost = async (req, res, next) => {
       throw error;
     }
 
-    if (post.creator.toString() !== req.userId) {
+    if (post.creator._id.toString() !== req.userId) {
       const error = new Error('Not authorized!');
       error.statusCode = 403;
       throw error;
@@ -163,6 +174,10 @@ exports.deletePost = async (req, res, next) => {
     const user = await User.findById(req.userId);
     await user.posts.pull(postId);
     await user.save();
+
+    const io = socket.getIO();
+    io.getIO().emit('posts', { action: 'delete', post: postId });
+
     res.status(200).json({ message: 'Deleted post.' });
   } catch (err) {
     if (!err.statusCode) {
