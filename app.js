@@ -30,13 +30,7 @@ app.use(config.cors);
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
 
-app.use((error, req, res, next) => {
-  console.log(error);
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
-  res.status(status).json({ message: message, data: data });
-});
+app.use(errorHandler.error);
 
 mongoose
   .connect(
@@ -44,6 +38,10 @@ mongoose
     { useNewUrlParser: true },
   )
   .then(() => {
-    app.listen(8080);
+    const server = app.listen(8080);
+    const io = require('./config/socket').init(server);
+    io.on('connection', (socket) => {
+      console.log('Client connected');
+    });
   })
   .catch((err) => console.log(err));

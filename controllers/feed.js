@@ -1,12 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const { validationResult } = require('express-validator/check');
+
+const feedRepository = require('../repositories/feed-repository');
 
 const clearImage = (filePath) => {
   const filePathToDelete = path.join(__dirname, '..', filePath);
   fs.unlinkSync(filePathToDelete);
 };
-
-const { validationResult } = require('express-validator/check');
 
 const Post = require('../models/post');
 const User = require('../models/user');
@@ -15,11 +16,8 @@ exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const perPage = 2;
   try {
-    const totalItems = await Post.find().countDocuments();
-
-    const posts = await Post.find()
-      .skip((currentPage - 1) * perPage)
-      .limit(perPage);
+    const totalItems = await feedRepository.postsCount();
+    const posts = await feedRepository.find(perPage, currentPage);
 
     res.status(200).json({
       message: 'Fetched posts successfully.',
@@ -50,14 +48,13 @@ exports.createPost = async (req, res, next) => {
   const imageUrl = req.file.path;
   const { title, content } = req.body;
 
-  const post = new Post({
-    title,
-    content,
-    imageUrl,
-    creator: req.userId,
-  });
   try {
-    await post.save();
+    const post = await feedRepository.createPost({
+      title,
+      content,
+      imageUrl,
+      creator: req.userId,
+    });
     const creator = await User.findById(req.userId);
     creator.posts.push(post);
     const result = await creator.save();
@@ -78,7 +75,7 @@ exports.createPost = async (req, res, next) => {
 exports.getPost = async (req, res, next) => {
   const { postId } = req.params;
   try {
-    const post = await Post.findById(postId);
+    const post = await feedRepository.findById(postId);
     if (!post) {
       const error = new Error('Could not find post.');
       error.statusCode = 404;
@@ -113,7 +110,7 @@ exports.updatePost = async (req, res, next) => {
     throw error;
   }
   try {
-    const post = Post.findById(postId);
+    const post = await feedRepository.findById(postId);
     if (!post) {
       const error = new Error('Could not find post.');
       error.statusCode = 404;
@@ -147,7 +144,7 @@ exports.deletePost = async (req, res, next) => {
   const { postId } = req.params;
 
   try {
-    const post = await Post.findById(postId);
+    const post = await feedRepository.findById(postId);
     if (!post) {
       const error = new Error('Could not find post.');
       error.statusCode = 404;
